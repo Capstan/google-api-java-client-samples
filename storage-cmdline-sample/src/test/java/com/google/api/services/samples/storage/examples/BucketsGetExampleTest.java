@@ -14,6 +14,7 @@
 
 package com.google.api.services.samples.storage.examples;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -22,6 +23,7 @@ import com.google.api.services.samples.storage.examples.BucketsGetExample;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.Storage.Buckets;
 import com.google.api.services.storage.Storage.Buckets.Get;
+import com.google.api.services.storage.model.Bucket;
 
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -37,9 +39,12 @@ public class BucketsGetExampleTest {
     Storage storage = Mockito.mock(Storage.class);
     Buckets bucketsCollection = Mockito.mock(Buckets.class);
     Get getRequest = Mockito.mock(Get.class);
+    Bucket bucketResponse = new Bucket().setName(bucketName);
     when(storage.buckets()).thenReturn(bucketsCollection);
     when(bucketsCollection.get(bucketName)).thenReturn(getRequest);
-    BucketsGetExample.get(storage, bucketName);
+    when(getRequest.execute()).thenReturn(bucketResponse);
+    Bucket response = BucketsGetExample.get(storage, bucketName);
+    assertEquals(bucketResponse, response);
     verify(storage).buckets();
     verify(bucketsCollection).get(bucketName);
     verify(getRequest).setProjection("full");
