@@ -34,7 +34,6 @@ import com.google.api.services.storage.Storage.Buckets.Get;
 import com.google.api.services.storage.model.Bucket;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -48,7 +47,7 @@ import java.io.IOException;
 
 /** Test for example class exemplifying retrieving bucket metadata. */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({CredentialsProvider.class, Storage.Builder.class})
+@PrepareForTest({CredentialsProvider.class, Storage.Builder.class, BucketsGetExample.class})
 @PowerMockIgnore("javax.net.ssl.*")
 public class BucketsGetExampleTest {
   
@@ -92,7 +91,6 @@ public class BucketsGetExampleTest {
     verifyNoMoreInteractions(storage, bucketsCollection, getRequest);
   }
   
-  @Ignore("Issues a real request despite being mocked.")
   @Test
   public void testMain() throws Exception {
     PowerMockito.mockStatic(CredentialsProvider.class);
@@ -100,9 +98,13 @@ public class BucketsGetExampleTest {
         .thenReturn(Mockito.mock(Credential.class));
     Storage.Builder storageBuilder = PowerMockito.mock(Storage.Builder.class);
     whenNew(Storage.Builder.class).withAnyArguments().thenReturn(storageBuilder);
+    when(storageBuilder.setApplicationName(anyString())).thenReturn(storageBuilder);
     when(storageBuilder.build()).thenReturn(storage);
     when(getRequest.execute()).thenReturn(new Bucket());
     BucketsGetExample.main(null);
+    PowerMockito.verifyStatic();
+    CredentialsProvider.authorize(any(HttpTransport.class), any(JsonFactory.class));
+    PowerMockito.verifyNew(Storage.Builder.class);
   }
 
 }
