@@ -40,6 +40,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -48,6 +49,7 @@ import java.io.IOException;
 /** Test for example class exemplifying retrieving bucket metadata. */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({CredentialsProvider.class, Storage.Builder.class})
+@PowerMockIgnore("javax.net.ssl.*")
 public class BucketsGetExampleTest {
   
   @Mock private Storage storage;
@@ -90,8 +92,7 @@ public class BucketsGetExampleTest {
     verifyNoMoreInteractions(storage, bucketsCollection, getRequest);
   }
   
-  @Ignore("NoSuchAlgorithmException: class configured for SSLContext: "
-      + "sun.security.ssl.SSLContextImpl$TLS10Context not a SSLContext")
+  @Ignore("Issues a real request despite being mocked.")
   @Test
   public void testMain() throws Exception {
     PowerMockito.mockStatic(CredentialsProvider.class);
