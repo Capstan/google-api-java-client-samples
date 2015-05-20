@@ -18,6 +18,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -47,7 +48,7 @@ import java.io.IOException;
 
 /** Test for example class exemplifying retrieving bucket metadata. */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({CredentialsProvider.class, Storage.Builder.class, BucketsGetExample.class})
+@PrepareForTest({BucketsGetExample.class, CredentialsProvider.class, Storage.Builder.class})
 @PowerMockIgnore("javax.net.ssl.*")
 public class BucketsGetExampleTest {
   
@@ -93,18 +94,26 @@ public class BucketsGetExampleTest {
   
   @Test
   public void testMain() throws Exception {
-    PowerMockito.mockStatic(CredentialsProvider.class);
+    PowerMockito.mockStatic(BucketsGetExample.class, CredentialsProvider.class);
+    PowerMockito.doCallRealMethod().when(BucketsGetExample.class);
+    BucketsGetExample.main(any(String[].class));
+    Credential credential = Mockito.mock(Credential.class);
     when(CredentialsProvider.authorize(any(HttpTransport.class), any(JsonFactory.class)))
-        .thenReturn(Mockito.mock(Credential.class));
+        .thenReturn(credential);
     Storage.Builder storageBuilder = PowerMockito.mock(Storage.Builder.class);
     whenNew(Storage.Builder.class).withAnyArguments().thenReturn(storageBuilder);
     when(storageBuilder.setApplicationName(anyString())).thenReturn(storageBuilder);
     when(storageBuilder.build()).thenReturn(storage);
-    when(getRequest.execute()).thenReturn(new Bucket());
+    when(BucketsGetExample.get(any(Storage.class), anyString())).thenReturn(new Bucket());
     BucketsGetExample.main(null);
     PowerMockito.verifyStatic();
+    BucketsGetExample.main(any(String[].class));
+    PowerMockito.verifyStatic();
     CredentialsProvider.authorize(any(HttpTransport.class), any(JsonFactory.class));
-    PowerMockito.verifyNew(Storage.Builder.class);
+    PowerMockito.verifyNew(Storage.Builder.class).withArguments(any(HttpTransport.class),
+        any(JsonFactory.class), eq(credential));
+    PowerMockito.verifyStatic();
+    BucketsGetExample.get(any(Storage.class), anyString());
   }
 
 }
