@@ -1,6 +1,7 @@
 */target
 */proguard
 */gen
+.gradle/**
 gradle/**
 gradlew*
 *.iml
